@@ -19,6 +19,9 @@ _copyright CAM IT Solutions 2016_
 ### How do I get set up?
 
 #### set up
+ - download Master version
+ - update paramter.ps1 file with correct values
+ - run script (tested to run from withing PowerShell ISE)
  
 #### usage
 
