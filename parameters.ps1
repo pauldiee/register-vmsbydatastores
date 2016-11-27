@@ -6,7 +6,9 @@
     Copyright 2016 - CAM IT Solutions
 #>
 
+#region Custom Type definitions
 #-- Type definitions needed for syslog function
+
 Add-Type -TypeDefinition @"
        public enum Syslog_Facility
        {
@@ -51,7 +53,12 @@ Add-Type -TypeDefinition @"
           }
 "@
 
+#endregion 
+
 @{
+    #-- vSphere vCenter FQDN
+        vCenter="000-srv-vmvc-01.paas.camcube.nl" 
+
     #-- default script parameters
         LogPath="D:\beheer\logs"
         LogDays=5 #-- Logs older dan x days will be removed
@@ -62,6 +69,4 @@ Add-Type -TypeDefinition @"
     #-- disconnect viServer in exit-script function
         DisconnectviServerOnExit=$true
 
-    #-- vSphere vCenter FQDN
-        vCenter="value" #-- description of param1
 }
