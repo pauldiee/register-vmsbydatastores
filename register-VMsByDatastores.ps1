@@ -280,7 +280,7 @@ Process{
         write-warning "Geen datastore geselecteerd."
         exit-script
     }
-    $VMFolder = get-folder | ? {$_.Type -imatch "VM"} | select name,parent | sort-object name | Out-GridView -Title "Select Folder" -OutputMode Single
+    $VMFolder = get-folder | ? {$_.Type -imatch "VM"} | select name,parent | sort-object name | Out-GridView -Title "Select Folder" -OutputMode Single | select -ExpandProperty name
     if ($vmFolder.length -le 0) {
         Write-Warning "Geen VM Folder geselecteerd."
         exit-script
@@ -292,6 +292,8 @@ Process{
     #build table containing all registed VMs
     $knownVMTable = get-vm | select name | Group-Object -AsHashTable -Property name
  
+    $tasklist=@{}
+
     foreach($Datastore in $Datastore) {
         # Searches for .VMX Files in datastore variable
         $ds = Get-Datastore -Name $Datastore | %{Get-View $_.Id}
@@ -302,17 +304,48 @@ Process{
  
         # Find all .VMX file paths in Datastore variable and filters out .snapshot
         $SearchResult = $dsBrowser.SearchDatastoreSubFolders($DatastorePath, $SearchSpec) | where {$_.FolderPath -notmatch ".snapshot"} | %{$_.FolderPath + ($_.File | select Path).Path}
+        write-host ("Found "+ $SearchResult.Count + " VMX files in datastore.")
  
         # Register .VMX files with vCenter, check if VM is already registered
+        $VMXRegisterActions=0
+        $VMXfilesSkipped=0
         foreach($VMXFile in $SearchResult) {
             if ($knownVMTable.Contains((split-path $VMXFile -leaf).split(".")[0] )) {
+                $VMXfilesSkipped++
                 write-host "VMXfile $vmxfile already registered. Skipping"
             } else {
-                New-VM -VMFilePath $VMXFile -VMHost $ESXHost -Location $VMFolder -RunAsync
+                $VMXRegisterActions++
+                $tasklist[(New-VM -VMFilePath $VMXFile -VMHost $ESXHost -Location $VMFolder -RunAsync).id]=(split-path $VMXFile -leaf).split(".")[0]
             }
          }
     }
 
+    # Check running tasks
+    $runningTasks=$tasklist.Count
+    $VMXSuccesfullyRegistered=0
+    $VMXFailed2Register=0
+    while($runningTasks -gt 0) {
+        get-task | %{
+            if ($tasklist.ContainsKey($_.id)){
+                switch ($_.state) {
+
+                "Success" {
+                    $VMXSuccesfullyRegistered++
+                    $tasklist.Remove($_.id)
+                    $runningTasks--
+                    }
+
+                "Error" {
+                    $VMXFailed2Register++
+                    $tasklist.Remove($_.id)
+                    $runningTasks--
+                    }
+                }
+            }
+        }
+        start-sleep -Seconds 5 # check tasks every 5 seconds
+    }
+    write-host "VMX files Registered: $VMXSuccesfullyRegistered, Skipped: $VMXfilesSkipped, failed: $VMXFailed2Register  "
 }
 
 End{
