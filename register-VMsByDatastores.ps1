@@ -323,42 +323,11 @@ Process{
             } else {
                 $VMXRegisterActions++
                 write-host $VMXFile
-                $task=(New-VM -VMFilePath $VMXFile -VMHost $ESXHost -Location $VMFolder -RunAsync)
-                $tasklist[$task.id]=(split-path $VMXFile -leaf).split(".")[0]
+                New-VM -VMFilePath $VMXFile -VMHost $ESXHost -Location $VMFolder -RunAsync | out-null
             }
          }
     }
-<# temporary out-of-order
-    # Check running tasks
-    $runningTasks=$tasklist.Count
-    $VMXSuccesfullyRegistered=0
-    $VMXFailed2Register=0
-    write-host "Waiting for all tasks to finish"
-    while($runningTasks -gt 0) {
-        write-host $runningTasks
-        get-task | %{
-            $task=$_
-            if ($tasklist.ContainsKey($task.id)){
-                switch ($task.state) {
-
-                "Success" {
-                    $VMXSuccesfullyRegistered++
-                    $tasklist.Remove($task.id)
-                    $runningTasks--
-                    }
-
-                "Error" {
-                    $VMXFailed2Register++
-                    $tasklist.Remove($task.id)
-                    $runningTasks--
-                    }
-                }
-            }
-        }
-        start-sleep -Seconds 5 # check tasks every 5 seconds
-    }
-    write-host "VMX files Registered: $VMXSuccesfullyRegistered, Skipped: $VMXfilesSkipped, failed: $VMXFailed2Register  "
-#>
+    write-host "VMs registered: $VMXRegisterActions, skipped: $VMXfilesSkipped"
 }
 
 End{
