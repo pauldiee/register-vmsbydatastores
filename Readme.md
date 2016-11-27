@@ -7,6 +7,7 @@ _copyright CAM IT Solutions 2016_
 ### Version
 | Version | Branch |Owner|
 |---|---|---|
+|0.1.0|release/v0.1.0| [v0.1.0](https://git.camcube.nl/plugins/servlet/archive/projects/SV/repos/register-vmsbydatastores?at=release/v0.1.0)| Bart Lievers
 |0.0.5|[Master](https://git.camcube.nl/plugins/servlet/archive/projects/SV/repos/register-vmsbydatastores?at=Master)| Bart Lievers|
 |0.0.5|[Develop/v0.0.5](https://git.camcube.nl/plugins/servlet/archive/projects/SV/repos/register-vmsbydatastores?at=develop/v0.0.5)| Bart Lievers|
 
@@ -14,6 +15,7 @@ _copyright CAM IT Solutions 2016_
 ### Change Log
 |Version| Change |
 |---|---|---|
+|0.1.0| first release |
 |0.0.5| Start commit and initial script |
 
 ### How do I get set up?
