@@ -291,6 +291,7 @@ Process{
     write-host "Selected $ESXhost to register VMs on."
     #build table containing all registed VMs
     $knownVMTable = get-vm | select name | Group-Object -AsHashTable -Property name
+
  
     $tasklist=@{}
 
@@ -301,6 +302,11 @@ Process{
         $SearchSpec.matchpattern = "*.vmx"
         $dsBrowser = Get-View $ds.browser
         $DatastorePath = "[" + $ds.Summary.Name + "]"
+        $vms=@{}
+        foreach ($vmImpl in $ds.Vm){
+        $vm=get-view $vmImpl
+        $vms.add($vm.config.files.VmPathName,$ds.name)
+        }
  
         # Find all .VMX file paths in Datastore variable and filters out .snapshot
         $SearchResult = $dsBrowser.SearchDatastoreSubFolders($DatastorePath, $SearchSpec) | where {$_.FolderPath -notmatch ".snapshot"} | %{$_.FolderPath + ($_.File | select Path).Path}
@@ -310,12 +316,15 @@ Process{
         $VMXRegisterActions=0
         $VMXfilesSkipped=0
         foreach($VMXFile in $SearchResult) {
-            if ($knownVMTable.Contains((split-path $VMXFile -leaf).split(".")[0] )) {
+            #if ($knownVMTable.Contains((split-path $VMXFile -leaf).split(".")[0] )) {
+            if ($vms.ContainsKey($VMXFile)){
                 $VMXfilesSkipped++
                 write-host "VMXfile $vmxfile already registered. Skipping"
             } else {
                 $VMXRegisterActions++
-                $tasklist[(New-VM -VMFilePath $VMXFile -VMHost $ESXHost -Location $VMFolder -RunAsync).id]=(split-path $VMXFile -leaf).split(".")[0]
+                write-host $VMXFile
+                $task=(New-VM -VMFilePath $VMXFile -VMHost $ESXHost -Location $VMFolder -RunAsync)
+                $tasklist[$task.id]=(split-path $VMXFile -leaf).split(".")[0]
             }
          }
     }
@@ -324,20 +333,23 @@ Process{
     $runningTasks=$tasklist.Count
     $VMXSuccesfullyRegistered=0
     $VMXFailed2Register=0
+    write-host "Waiting for all tasks to finish"
     while($runningTasks -gt 0) {
+        write-host $runningTasks
         get-task | %{
-            if ($tasklist.ContainsKey($_.id)){
-                switch ($_.state) {
+            $task=$_
+            if ($tasklist.ContainsKey($task.id)){
+                switch ($task.state) {
 
                 "Success" {
                     $VMXSuccesfullyRegistered++
-                    $tasklist.Remove($_.id)
+                    $tasklist.Remove($task.id)
                     $runningTasks--
                     }
 
                 "Error" {
                     $VMXFailed2Register++
-                    $tasklist.Remove($_.id)
+                    $tasklist.Remove($task.id)
                     $runningTasks--
                     }
                 }
