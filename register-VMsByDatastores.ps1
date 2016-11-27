@@ -8,7 +8,7 @@
 .NOTES
     File Name          : register-VMsByDatastores.ps1
     Author             : Bart Lievers
-    version            : develop/v0.0.5
+    version            : release/v0.1.0
     Prerequisite       : Powershell >= v 3.0
                          PowerCLI >= 5.8
     Copyright 2015 - CAM IT Solutions
