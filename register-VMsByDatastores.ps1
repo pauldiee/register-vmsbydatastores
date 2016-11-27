@@ -328,7 +328,7 @@ Process{
             }
          }
     }
-
+<# temporary out-of-order
     # Check running tasks
     $runningTasks=$tasklist.Count
     $VMXSuccesfullyRegistered=0
@@ -358,6 +358,7 @@ Process{
         start-sleep -Seconds 5 # check tasks every 5 seconds
     }
     write-host "VMX files Registered: $VMXSuccesfullyRegistered, Skipped: $VMXfilesSkipped, failed: $VMXFailed2Register  "
+#>
 }
 
 End{
