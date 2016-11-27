@@ -6,8 +6,9 @@
 .EXAMPLE
     One or more examples for how to use this script
 .NOTES
-    File Name          : reg-sterVMsByDatastores.ps1
+    File Name          : register-VMsByDatastores.ps1
     Author             : Bart Lievers
+    version            : develop/v0.0.5
     Prerequisite       : Powershell >= v 3.0
                          PowerCLI >= 5.8
     Copyright 2015 - CAM IT Solutions
