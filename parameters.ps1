@@ -57,14 +57,14 @@ Add-Type -TypeDefinition @"
 
 @{
     #-- vSphere vCenter FQDN
-        vCenter="000-srv-vmvc-01.paas.camcube.nl" 
+        vCenter="" 
 
     #-- default script parameters
         LogPath="D:\beheer\logs"
         LogDays=5 #-- Logs older dan x days will be removed
 
     #-- Syslog
-        SyslogServer="syslog.shire.lan"
+        SyslogServer=""
 
     #-- disconnect viServer in exit-script function
         DisconnectviServerOnExit=$true
